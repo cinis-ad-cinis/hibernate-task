@@ -7,8 +7,6 @@ public interface UserDao {
     User findById(Integer id);
 
     void create(User user);
-    
-    void read(User user);
 
     void update(User user);
     

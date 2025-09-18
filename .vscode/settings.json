@@ -1,0 +1,15 @@
+{
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "username": "user_service_user",
+      "database": "user_service_db",
+      "name": "User_service"
+    }
+  ]
+}
