@@ -12,7 +12,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Builder
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +27,5 @@ public class User {
   private int age;
   
   @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt;
-
-  @PrePersist
-    protected void onCreate() {
-      createdAt = LocalDateTime.now();
-  }
+  private LocalDateTime createdAt =  LocalDateTime.now();
 }

@@ -5,10 +5,13 @@ import java.util.Scanner;
 import com.cinis.userservice.dao.UserDao;
 import com.cinis.userservice.dao.UserDaoImpl;
 import com.cinis.userservice.entity.User;
+import com.cinis.userservice.service.UserService;
+import com.cinis.userservice.service.UserServiceImpl;
 import com.cinis.userservice.utils.HibernateUtil;
 
 public class ConsoleApp {
   private static final UserDao userDao = new UserDaoImpl();
+  private static final UserService userService = new UserServiceImpl(userDao);
   private static Scanner scanner = new Scanner(System.in);
 
   public static void main(String[] args) {
@@ -51,73 +54,79 @@ public class ConsoleApp {
     System.out.print("Enter age: ");
     int age = Integer.parseInt(scanner.nextLine());
 
-    User user = new User();
-    user.setName(name);
-    user.setEmail(email);
-    user.setAge(age);
-    userDao.create(user);
+    try {
+      User user = userService.createUser(name, email, age);
+      System.out.println("User created successfully with ID: " + user.getId());
+    } catch (Exception e) {
+      System.out.println("Error creating user: " + e.getMessage());
+    }
   }
 
   private static void findUserById() {
     System.out.print("Enter user ID: ");
     int id = Integer.parseInt(scanner.nextLine());
     
-    User user = userDao.findById(id);
-    System.out.println(user != null ? user : "User with ID " + id + " not found."); 
+    try {
+      User user = userService.findUserById(id);
+      System.out.println(user != null ? user : "User with ID " + id + " not found.");
+    } catch (Exception e) {
+      System.out.println("Error finding user: " + e.getMessage());
+    }
   }
 
   private static void updateUser() {
     System.out.print("Enter user ID to update: ");
     int id = Integer.parseInt(scanner.nextLine());
     
-    User user = userDao.findById(id);
-    if (user == null) {
-      System.out.println("User with ID " + id + " not found.");
-      return;
-    }
-
-    System.out.println("Current user details:");
-    System.out.println("Name: " + user.getName());
-    System.out.println("Email: " + user.getEmail());
-    System.out.println("Age: " + user.getAge());
-
-    System.out.println("\nEnter new details:");
-
-    System.out.print("New name: ");
-    String newName = scanner.nextLine();
-    if (!newName.trim().isEmpty()) {
-        user.setName(newName);
-    }
-
-    System.out.print("New email: ");
-    String newEmail = scanner.nextLine();
-    if (!newEmail.trim().isEmpty()) {
-        user.setName(newEmail);
-    }
-
-    System.out.print("New age: ");
-    String newAge = scanner.nextLine();
-    if (!newAge.trim().isEmpty()) {
-      try {
-        user.setAge(Integer.parseInt(newAge));
-      } catch (NumberFormatException e) {
-          System.out.println("Invalid age format");
-        }
+    try {
+      User user = userService.findUserById(id);
+      if (user == null) {
+        System.out.println("User with ID " + id + " not found.");
+        return;
       }
 
-    userDao.update(user);
+      System.out.println("Current user details:");
+      System.out.println("Name: " + user.getName());
+      System.out.println("Email: " + user.getEmail());
+      System.out.println("Age: " + user.getAge());
+
+      System.out.println("\nEnter new details:");
+
+      System.out.print("New name: ");
+      String newName = scanner.nextLine();
+
+      System.out.print("New email: ");
+      String newEmail = scanner.nextLine();
+      
+      System.out.print("New age: ");
+      String newAgeStr = scanner.nextLine();
+      Integer newAge = newAgeStr.trim().isEmpty() ? null : Integer.parseInt(newAgeStr);
+
+      User updatedUser = userService.updateUser(id, 
+        newName.trim().isEmpty() ? null : newName,
+        newEmail.trim().isEmpty() ? null : newEmail,
+        newAge);
+
+      System.out.println("User updated successfully: " + updatedUser);
+    } catch (Exception e) {
+        System.out.println("Error updating user: " + e.getMessage());
+    }
   }
 
   private static void deleteUser() {
     System.out.print("Enter user ID to delete: ");
     int id = Integer.parseInt(scanner.nextLine());
     
-    User user = userDao.findById(id);
-    if (user == null) {
-      System.out.println("User with ID " + id + " not found.");
-      return;
+    try {
+      User user = userService.findUserById(id);
+      if (user == null) {
+        System.out.println("User with ID " + id + " not found.");
+        return;
+      }
+      userService.deleteUser(id);
+    } catch (Exception e) {
+      System.out.println("Error deleting user: " + e.getMessage());
     }
-    userDao.remove(user);
   }
 
   private static void printMenu() {
