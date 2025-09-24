@@ -26,15 +26,15 @@ public class UserServiceImplTest {
 
   private User testUser;
     
-    @BeforeEach
-    void setUp() {
-      testUser = new User();
-      testUser.setId(1);
-      testUser.setName("Test Name");
-      testUser.setEmail("name@example.com");
-      testUser.setAge(32);
-      testUser.setCreatedAt(LocalDateTime.now());
-    }
+  @BeforeEach
+  void setUp() {
+    testUser = new User();
+    testUser.setId(1);
+    testUser.setName("Test Name");
+    testUser.setEmail("name@example.com");
+    testUser.setAge(32);
+    testUser.setCreatedAt(LocalDateTime.now());
+  }
 
   @Test
   void createUser_WithData_UserCreated() {
@@ -88,6 +88,19 @@ public class UserServiceImplTest {
   }
 
   @Test
+  void updateUser_WithNonExistentId_ExceptionThrown() {
+    when(userDao.findById(9999)).thenReturn(null);
+
+    try {
+      userService.updateUser(9999, "New Name", "new@example.com", 32);
+      fail("Expected RuntimeException was not thrown");
+    } catch (RuntimeException e) {
+      assertEquals("User with ID 9999 not found", e.getMessage());
+    }
+    verify(userDao, never()).update(any());
+}
+
+  @Test
   void deleteUser_WithExistingId_UserDeleted() {
     when(userDao.findById(1)).thenReturn(testUser);
 
@@ -95,5 +108,18 @@ public class UserServiceImplTest {
 
     verify(userDao, times(1)).findById(1);
     verify(userDao, times(1)).remove(testUser);
+  }
+
+  @Test
+  void deleteUser_WithNonExistentId_ExceptionThrown() {
+    when(userDao.findById(9999)).thenReturn(null);
+
+    try {
+      userService.deleteUser(9999);
+      fail("Expected RuntimeException was not thrown");
+    } catch (RuntimeException e) {
+      assertEquals("User with ID 9999 not found", e.getMessage());
+    }
+    verify(userDao, never()).remove(any());
   }
 }
