@@ -15,6 +15,7 @@ public class UserDaoImpl implements UserDao {
     try (Session session = HibernateUtil.getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
       session.persist(user);
+      session.flush();
       transaction.commit();
       log.info("User {} successfully saved with ID {}", user.getName(), user.getId());
     } catch (Exception e) {
@@ -46,7 +47,18 @@ public class UserDaoImpl implements UserDao {
     Transaction transaction = null;
     try (Session session = HibernateUtil.getSessionFactory().openSession()) {
       transaction = session.beginTransaction();
-      session.merge(user);
+
+      User existingUser = session.find(User.class, user.getId());
+      if (existingUser == null) {
+        throw new RuntimeException("User with ID " + user.getId() + " not found");
+      }
+
+      existingUser.setName(user.getName());
+      existingUser.setEmail(user.getEmail());
+      existingUser.setAge(user.getAge());
+
+      session.merge(existingUser);
+
       transaction.commit();
       log.info("User {} with ID {} successfully updated", user.getName(), user.getId());
     } catch (Exception e) {
